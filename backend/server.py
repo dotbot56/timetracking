@@ -5,7 +5,17 @@ from typing import Any
 
 from datetime import date as dt_date, time as dt_time
 
-from backend.main import TimeEntry, create_entry, list_entries, as_dict, Expense
+from backend.main import (
+    TimeEntry,
+    Expense,
+    as_dict,
+    create_entry,
+    list_entries,
+    register_user,
+    login_user,
+    list_pending_users,
+    approve_user,
+)
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -19,6 +29,9 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:  # noqa: N802
         if self.path == "/time-entries":
             data = [as_dict(e) for e in list_entries()]
+            self._send(200, data)
+        elif self.path == "/users/pending":
+            data = [as_dict(u) for u in list_pending_users()]
             self._send(200, data)
         else:
             self._send(404, {"detail": "Not found"})
@@ -40,19 +53,39 @@ class Handler(BaseHTTPRequestHandler):
             )
             created = create_entry(entry)
             self._send(200, as_dict(created))
+        elif self.path == "/register":
+            length = int(self.headers.get("Content-Length", 0))
+            data = json.loads(self.rfile.read(length))
+            try:
+                user = register_user(data["username"], data["password"])
+                self._send(201, as_dict(user))
+            except ValueError as exc:
+                self._send(400, {"detail": str(exc)})
+        elif self.path == "/login":
+            length = int(self.headers.get("Content-Length", 0))
+            data = json.loads(self.rfile.read(length))
+            try:
+                user = login_user(data["username"], data["password"])
+                self._send(200, as_dict(user))
+            except ValueError as exc:
+                self._send(403, {"detail": str(exc)})
+        elif self.path == "/users/approve":
+            length = int(self.headers.get("Content-Length", 0))
+            data = json.loads(self.rfile.read(length))
+            try:
+                user = approve_user(data["username"], data["role"])
+                self._send(200, as_dict(user))
+            except ValueError as exc:
+                self._send(400, {"detail": str(exc)})
         else:
             self._send(404, {"detail": "Not found"})
 
     def do_OPTIONS(self) -> None:  # noqa: N802
-        if self.path == "/time-entries":
-            self.send_response(204)
-            self.send_header("Access-Control-Allow-Origin", "*")
-            self.send_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
-            self.send_header("Access-Control-Allow-Headers", "Content-Type")
-            self.end_headers()
-        else:
-            self.send_response(404)
-            self.end_headers()
+        self.send_response(204)
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.end_headers()
 
 
 def run(port: int = 8000) -> None:
