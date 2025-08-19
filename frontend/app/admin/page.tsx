@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useState } from 'react';
 
 interface PendingUser {
@@ -35,19 +37,19 @@ export default function Admin() {
   };
 
   return (
-    <main>
+    <main style={{padding:'2rem'}}>
       <h1>Admin</h1>
       {message && <p>{message}</p>}
       <ul>
         {pending.map(u => (
-          <li key={u.username}>
+          <li key={u.username} style={{marginBottom:'0.5rem'}}>
             {u.username}
             <select value={role[u.username] || 'mitarbeiter'} onChange={e => setRole({ ...role, [u.username]: e.target.value })}>
               <option value="admin">admin</option>
               <option value="vorgesetzter">vorgesetzter</option>
               <option value="mitarbeiter">mitarbeiter</option>
             </select>
-            <button onClick={() => approve(u.username)}>Freigeben</button>
+            <button onClick={() => approve(u.username)} style={{marginLeft:'0.5rem'}}>Freigeben</button>
           </li>
         ))}
       </ul>
