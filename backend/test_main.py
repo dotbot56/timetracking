@@ -20,4 +20,3 @@ def test_create_and_list_entries():
     entries = list_entries()
     assert len(entries) == 1
     assert entries[0].id == 1
-

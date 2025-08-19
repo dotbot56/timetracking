@@ -44,5 +44,4 @@ def create_entry(entry: TimeEntry) -> TimeEntry:
 # Helper used by server and tests to convert dataclasses to JSON serialisable dicts
 
 def as_dict(obj):
-    return asdict(obj)
-
+    
