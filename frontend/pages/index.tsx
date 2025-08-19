@@ -13,17 +13,22 @@ interface TimeEntry {
 
 export default function Home() {
   const [entries, setEntries] = useState<TimeEntry[]>([]);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     fetch('http://localhost:8000/time-entries')
       .then(res => res.json())
       .then(setEntries)
-      .catch(() => setEntries([]));
+      .catch(() => {
+        setError(true);
+        setEntries([]);
+      });
   }, []);
 
   return (
     <main>
       <h1>Time Entries</h1>
+      {error && <p>Backend nicht erreichbar</p>}
       <ul>
         {entries.map(e => (
           <li key={e.id}>
