@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, field, asdict, is_dataclass
 from datetime import date, time
 from typing import List, Optional
 
@@ -44,4 +44,17 @@ def create_entry(entry: TimeEntry) -> TimeEntry:
 # Helper used by server and tests to convert dataclasses to JSON serialisable dicts
 
 def as_dict(obj):
+    """Recursively convert dataclasses to dictionaries.
+
+    Supports dataclass instances as well as lists and dictionaries containing
+    dataclasses so that server responses can be JSON serialised.
+    """
+    if is_dataclass(obj):
+        return asdict(obj)
+    if isinstance(obj, list):
+        return [as_dict(item) for item in obj]
+    if isinstance(obj, dict):
+        return {key: as_dict(value) for key, value in obj.items()}
+    return obj
+
     
