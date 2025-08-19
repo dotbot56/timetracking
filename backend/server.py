@@ -12,6 +12,7 @@ class Handler(BaseHTTPRequestHandler):
     def _send(self, code: int, payload: Any) -> None:
         self.send_response(code)
         self.send_header("Content-Type", "application/json")
+        self.send_header("Access-Control-Allow-Origin", "*")
         self.end_headers()
         self.wfile.write(json.dumps(payload).encode())
 
@@ -41,6 +42,17 @@ class Handler(BaseHTTPRequestHandler):
             self._send(200, as_dict(created))
         else:
             self._send(404, {"detail": "Not found"})
+
+    def do_OPTIONS(self) -> None:  # noqa: N802
+        if self.path == "/time-entries":
+            self.send_response(204)
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
+            self.send_header("Access-Control-Allow-Headers", "Content-Type")
+            self.end_headers()
+        else:
+            self.send_response(404)
+            self.end_headers()
 
 
 def run(port: int = 8000) -> None:
