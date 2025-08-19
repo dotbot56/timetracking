@@ -4,15 +4,16 @@ This repository contains a minimal scaffold for a time tracking application for 
 
 ## Structure
 
-- `backend/` – FastAPI service with in-memory storage and tests.
+- `backend/` – lightweight Python backend with in-memory storage and tests.
 - `frontend/` – Next.js frontend that fetches time entries from the backend.
 
 ## Backend
 
+The backend uses only the Python standard library.
+
 ```bash
-pip install -r backend/requirements.txt
 pytest backend
-uvicorn backend.main:app --reload
+python -m backend.server
 ```
 
 ## Frontend

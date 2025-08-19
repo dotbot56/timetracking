@@ -1,16 +1,19 @@
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from dataclasses import dataclass, field, asdict
 from datetime import date, time
 from typing import List, Optional
 
-app = FastAPI(title="Timetracking API")
 
-class Expense(BaseModel):
+@dataclass
+class Expense:
+    """Simple expense representation."""
     type: str
     amount: float
     note: Optional[str] = None
 
-class TimeEntry(BaseModel):
+
+@dataclass
+class TimeEntry:
+    """Time entry recorded by a user on a site."""
     id: int
     user_id: int
     site_id: int
@@ -19,20 +22,26 @@ class TimeEntry(BaseModel):
     end_time: time
     lunch_flat_applied: bool = False
     travel_minutes: int = 0
-    expenses: List[Expense] = []
+    expenses: List[Expense] = field(default_factory=list)
+
 
 entries: List[TimeEntry] = []
 
-@app.get("/time-entries", response_model=List[TimeEntry])
+
 def list_entries() -> List[TimeEntry]:
     """Return all stored time entries."""
     return entries
 
-@app.post("/time-entries", response_model=TimeEntry)
+
 def create_entry(entry: TimeEntry) -> TimeEntry:
-    """Create a new time entry in memory."""
+    """Store a new time entry, ensuring unique IDs."""
     if any(e.id == entry.id for e in entries):
-        raise HTTPException(status_code=400, detail="Duplicate entry ID")
+        raise ValueError("Duplicate entry ID")
     entries.append(entry)
     return entry
 
+
+# Helper used by server and tests to convert dataclasses to JSON serialisable dicts
+
+def as_dict(obj):
+    
